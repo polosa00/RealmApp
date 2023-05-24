@@ -79,7 +79,7 @@ final class StorageManager {
         }
     }
     
-    func done(task: Task) {
+    func done(task: Task, completion: () -> Void) {
         write {
             task.isComplete.toggle()
         }
