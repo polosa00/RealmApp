@@ -72,10 +72,10 @@ final class StorageManager {
     }
     
     
-    func edit(task: Task, name: String, note: String) {
+    func editTask(_ task: Task,_ newTitle: String? = nil, _ newNote: String? = nil ) {
         write {
-            task.title = name
-            task.note = note
+            task.title = newTitle ?? task.title
+            task.note = newNote ?? task.note
         }
     }
     

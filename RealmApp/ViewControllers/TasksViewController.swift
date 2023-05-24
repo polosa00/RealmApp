@@ -77,9 +77,8 @@ extension TasksViewController {
                 style: .default
             ) { [weak self] taskTitle, taskNote in
                 if let task, let completion {
-                    self?.storageManager.edit(task: task, name: taskTitle, note: taskNote)
+                    self?.storageManager.editTask(task)
                     completion()
-                    // TODO: - edit task
                     return
                 }
                 self?.save(task: taskTitle, withNote: taskNote)
@@ -96,4 +95,5 @@ extension TasksViewController {
             tableView.insertRows(at: [rowIndex], with: .automatic)
         }
     }
+
 }
