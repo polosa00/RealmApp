@@ -13,7 +13,7 @@ final class TaskListViewController: UITableViewController {
 
     // MARK: - Private Properties
     private var taskLists: Results<TaskList>!
-    private var filteredTaskList: Results<TaskList>!
+    private var unFilteredTaskList: Results<TaskList>!
     private let storageManager = StorageManager.shared
     private let dataManager = DataManager.shared
     
@@ -54,7 +54,7 @@ final class TaskListViewController: UITableViewController {
         if unCompletedTask.count == 0 {
             content.secondaryText = "All Done"
         } else {
-            content.secondaryText = taskList.tasks.count.formatted()
+            content.secondaryText = unCompletedTask.count.formatted()
         }
         
         cell.contentConfiguration = content
@@ -100,10 +100,10 @@ final class TaskListViewController: UITableViewController {
     // MARK: - IB Methods
     @IBAction func sortingList(_ sender: UISegmentedControl) {
         if sender.selectedSegmentIndex == 1 {
-            filteredTaskList = taskLists
+            unFilteredTaskList = taskLists
             taskLists = storageManager.realm.objects(TaskList.self).sorted(byKeyPath: "title")
         } else {
-            taskLists = filteredTaskList
+            taskLists = unFilteredTaskList
         }
         
         tableView.reloadData()
