@@ -11,11 +11,13 @@ import RealmSwift
 
 final class TaskListViewController: UITableViewController {
 
+    // MARK: - Private Properties
     private var taskLists: Results<TaskList>!
     private var filteredTaskList: Results<TaskList>!
     private let storageManager = StorageManager.shared
     private let dataManager = DataManager.shared
     
+    // MARK: - VC Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         let addButton = UIBarButtonItem(
@@ -36,7 +38,7 @@ final class TaskListViewController: UITableViewController {
         tableView.reloadData()
     }
     
-    // MARK: - UITableViewDataSource
+    // MARK: - Table View Data Source
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         taskLists.count
     }
@@ -95,6 +97,7 @@ final class TaskListViewController: UITableViewController {
         tasksVC.taskList = taskList
     }
 
+    // MARK: - IB Methods
     @IBAction func sortingList(_ sender: UISegmentedControl) {
         if sender.selectedSegmentIndex == 1 {
             filteredTaskList = taskLists
@@ -104,19 +107,6 @@ final class TaskListViewController: UITableViewController {
         }
         
         tableView.reloadData()
-    }
-    
-    @objc private func addButtonPressed() {
-        showAlert()
-    }
-    
-    private func createTempData() {
-        if !UserDefaults.standard.bool(forKey: "done") {
-            dataManager.createTempData { [unowned self] in
-                UserDefaults.standard.set(true, forKey: "done")
-                tableView.reloadData()
-            }
-        }
     }
 }
 
@@ -144,11 +134,27 @@ extension TaskListViewController {
         let alertController = alertBuilder.build()
         present(alertController, animated: true)
     }
-    
+}
+
+// MARK: - Private Methods
+extension TaskListViewController {
     private func save(taskList: String) {
         storageManager.save(taskList) { taskList in
             let rowIndex = IndexPath(row: taskLists.index(of: taskList) ?? 0, section: 0)
             tableView.insertRows(at: [rowIndex], with: .automatic)
+        }
+    }
+    
+    @objc private func addButtonPressed() {
+        showAlert()
+    }
+    
+    private func createTempData() {
+        if !UserDefaults.standard.bool(forKey: "done") {
+            dataManager.createTempData { [unowned self] in
+                UserDefaults.standard.set(true, forKey: "done")
+                tableView.reloadData()
+            }
         }
     }
 }

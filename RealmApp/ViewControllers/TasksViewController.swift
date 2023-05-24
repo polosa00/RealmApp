@@ -11,12 +11,14 @@ import RealmSwift
 
 final class TasksViewController: UITableViewController {
     
+    // MARK: - Properties
     var taskList: TaskList!
     
     private var currentTasks: Results<Task>!
     private var completedTasks: Results<Task>!
     private let storageManager = StorageManager.shared
 
+    // MARK: - VC Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         title = taskList.title
@@ -32,7 +34,7 @@ final class TasksViewController: UITableViewController {
         completedTasks = taskList.tasks.filter("isComplete = true")
     }
     
-    // MARK: - UITableViewDataSource
+    // MARK: - Table View Data Source
     override func numberOfSections(in tableView: UITableView) -> Int {
         2
     }
@@ -55,6 +57,7 @@ final class TasksViewController: UITableViewController {
         return cell
     }
     
+    // MARK: - Table View Delegate
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
     }
@@ -79,14 +82,9 @@ final class TasksViewController: UITableViewController {
         
         return UISwipeActionsConfiguration(actions: [deleteAction, editAction, doneAction])
     }
-    
-    
-    @objc private func addButtonPressed() {
-        showAlert()
-    }
-
 }
 
+// MARK: - Alert Controller
 extension TasksViewController {
     private func showAlert(with task: Task? = nil, completion: (() -> Void)? = nil) {
         let alertBuilder = AlertControllerBuilder(
@@ -101,7 +99,7 @@ extension TasksViewController {
                 style: .default
             ) { [weak self] taskTitle, taskNote in
                 if let task, let completion {
-                    self?.storageManager.editTask(task)
+                    self?.storageManager.edit(task)
                     completion()
                     return
                 }
@@ -113,6 +111,11 @@ extension TasksViewController {
         present(alertController, animated: true)
     }
     
+
+}
+
+// MARK: - Private Methods
+extension TasksViewController {
     private func save(task: String, withNote note: String) {
         storageManager.save(task, withNote: note, to: taskList) { task in
             let rowIndex = IndexPath(row: currentTasks.index(of: task) ?? 0, section: 0)
@@ -123,10 +126,10 @@ extension TasksViewController {
     private func delete(taskAt indexPath: IndexPath) {
         if indexPath.section == 0 {
             let taskToDelete = currentTasks[indexPath.row]
-            storageManager.delete(task: taskToDelete)
+            storageManager.delete(taskToDelete)
         } else if indexPath.section == 1 {
             let taskToDelete = completedTasks[indexPath.row]
-            storageManager.delete(task: taskToDelete)
+            storageManager.delete(taskToDelete)
         }
         
         tableView.deleteRows(at: [indexPath], with: .automatic)
@@ -149,13 +152,13 @@ extension TasksViewController {
     private func done(taskAt indexPath: IndexPath) {
         if indexPath.section == 0 {
             let task = currentTasks[indexPath.row]
-            storageManager.done(task: task) {
+            storageManager.done(task) {
                 currentTasks =
                     storageManager.realm.objects(Task.self).filter("isComplete = false")
             }
         } else if indexPath.section == 1 {
             let task = completedTasks[indexPath.row]
-            storageManager.done(task: task) {
+            storageManager.done(task) {
                 currentTasks =
                 storageManager.realm.objects(Task.self).filter("isComplete = true")
             }
@@ -171,5 +174,8 @@ extension TasksViewController {
         )
         tableView.endUpdates()
     }
-
+    
+    @objc private func addButtonPressed() {
+        showAlert()
+    }
 }
